@@ -1,0 +1,60 @@
+pragma solidity 0.7.0;
+// square root : https://ethereum.stackexchange.com/questions/2910/can-i-square-root-in-solidity
+
+contract distance{
+    int dis_num; int dis_den; int[] dis;  int num; int den; int sqrt1; int x; int y;
+    function sqrt(int x) public returns (int) {
+    int y;
+    int z = (x + 1) / 2;
+    y = x;
+    while (z < y) {
+        y = z;
+        z = (x / z + z) / 2;
+    }
+    return y;
+}
+    function get_lcm(int x, int y) internal returns(int){
+        int greater;  int lcm;
+        if(x>y){ greater =x;}
+        else{ greater =y;}
+        while(true){
+            if(x==0){ lcm = y; break;}
+            else if (y==0){lcm =x; break;}
+            else if(greater%x==0 && greater%y==0) { lcm = greater; break;}
+            greater +=1;
+        }
+        return greater;
+    }
+    function get_addition(int a, int b, int c, int d) internal returns(int,int){
+        int num; int den;
+        den = get_lcm(b,d);
+        if (b==0){num = c ; den = d;}
+        else if (d==0){num= a ; den = b;}
+        else    { num = ((den/b)*a) + ((den/d)*c);}
+        return (num,den);
+    }
+    function get_subtraction(int a, int b, int c, int d) internal returns(int,int){
+        int sub_num; int sub_den;
+        sub_den = get_lcm(b,d);
+        if(b==0){sub_num = c ; sub_den = d;}
+        else if (d==0){sub_num= a ; sub_den = b;}
+        else {sub_num = ((sub_den/b)*a) - ((sub_den/d)*c); }
+        return (sub_num,sub_den);
+    }
+
+    function euc_distance(int[] memory a, int[] memory b, int[] memory c, int[] memory d) public {
+        int oldnum=0; int oldden=0; int newnum=0; int newden=0;
+        for(uint i =0; i < a.length; i++){
+            oldnum = newnum; oldden = newden;
+            (newnum,newden) = get_subtraction (a[i], b[i], c[i], d[i]);
+            newnum = newnum * newnum;
+            newden = newden * newden;
+            if(i==0){num = newnum; den = newden;}
+            else{(oldnum,oldden) = get_addition (oldnum,oldden,newnum,newden);}
+        }
+       x = sqrt(num);
+       y = sqrt(den);
+    }
+    function set_distance() public view returns(int,int){ return(x,y);}
+    function set_sqrt() public view returns(int){ return sqrt1;}
+}

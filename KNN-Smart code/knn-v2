@@ -1,0 +1,53 @@
+pragma solidity 0.7.0;
+
+contract knn{
+    int x; int[] y; int[] output ;int[] input; int[] pos;
+    function sqrt(int x) public returns (int) {
+        int y;
+        int z = (x + 1) / 2;
+        y = x;
+        while (z < y) {
+            y = z;
+            z = (x / z + z) / 2;
+        }
+        return y;
+    }
+    function euc_distance(int[] memory a, int[] memory b) public returns(int) {
+        int sum =0; int res;
+        for(uint i=0; i < a.length; i++){
+            sum = sum +((a[i]-b[i])**2);
+        }
+        x = sqrt(sum);
+        return (x);
+    }
+
+    function set_dist() public view returns(int) {return x;}
+    function bubblesort(int[] memory x) public {
+        int a; int b;
+        input =x;
+        for (uint j =0; j<x.length;j++){
+            for (uint i=0;i<x.length-1;i++ ){
+                if(x[i]>x[i+1]){
+                    a = x[i];
+                    b = x[i+1];
+                    x[i] = b;
+                    x[i+1] = a;
+                }
+            }
+
+        }
+        output =x;
+    }
+    function get_pos(int[] memory a, int[] memory b) public {
+
+        for(uint i=0;i<input.length;i++){
+            for(uint j=0;j<input.length;j++){
+                if(input[i]==output[j]){
+                    pos[i] =int(j);
+                }
+            }
+        }
+    }
+    function set_sort() public view returns (int[] memory,int[] memory){ return (output,pos);}
+
+}
