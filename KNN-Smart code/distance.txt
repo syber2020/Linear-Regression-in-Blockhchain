@@ -1,0 +1,48 @@
+pragma solidity 0.7.0;
+contract distance{
+
+    int euc;  int[] output; int[] input; uint[] post;
+    int mink; int manh; int hamn;int hamd;
+    //this is internal function
+    function sqrt(int x) internal returns (int) {
+        int y;
+        int z = (x + 1) / 2;
+        y = x;
+        while (z < y) {
+            y = z;
+            z = (x / z + z) / 2;
+        }
+        return y;
+    }
+    // getting eucledian distance between and test point and all the training points
+    function euc_distance(int[] memory a, int[] memory b) public returns(int) {
+        int sum =0; int res;
+        for(uint i=0; i < a.length; i++){
+            sum = sum +((a[i]-b[i])**2);
+        }
+        euc = sqrt(sum);
+        return (euc);
+    }
+    function get_ham_dist(int[] memory a, int[] memory b, int n) public {
+        int distn =0; int temp;
+        for (uint i=0;i<a.length;i++){
+            temp = a[i]-b[i];
+            if(temp<1) temp = temp * -1;
+            distn=distn+temp;
+        }
+        hamn = distn;
+        hamd = n;
+    }
+    function get_manh_dist(int[] memory a, int[] memory b) public{
+        int dist =0; int temp;
+        for (uint i=0;i<a.length;i++){
+            temp = a[i]-b[i];
+            if(temp<1) temp = temp * -1;
+            dist = dist+temp;
+        }
+        manh=dist;
+    }
+    function set_euc_dist() public view returns(int) {return euc;}
+    function set_ham_dist() public view returns(int,int) {return (hamn,hamd);}
+    function set_manh_dist() public view returns(int) {return manh;}
+}

@@ -1,0 +1,89 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.7.0;
+
+//sort reference code : https://ethereum.stackexchange.com/questions/1517/sorting-an-array-of-integer-with-ethereum/89541
+
+// in this program , we can perform distance measurement, quicksorting and index of sorted array for upto 50 numbers.
+
+
+contract knnv3 {
+
+    int z;  int[] output; int[] input; uint[] post;
+    //this is internal function
+    function sqrt(int x) internal returns (int) {
+        int y;
+        int z = (x + 1) / 2;
+        y = x;
+        while (z < y) {
+            y = z;
+            z = (x / z + z) / 2;
+        }
+        return y;
+    }
+    // getting eucledian distance between and test point and all the training points
+    function euc_distance(int[] memory a, int[] memory b) public returns(int) {
+        int sum =0; int res;
+        for(uint i=0; i < a.length; i++){
+            sum = sum +((a[i]-b[i])**2);
+        }
+        z = sqrt(sum);
+        return (z);
+    }
+    
+    function set_dist() public view returns(int) {return z;}
+
+    uint[] sorted; int[]  c;
+    // this is internal function to get sorted arrays
+    function quickSort(uint[] memory arr,uint[] memory pos, int left, int right) public  {
+    int i = left;
+    int j = right;
+    if (i == j) return;
+    uint pivot = arr[uint(left + (right - left) / 2)];
+    while (i <= j) {
+        while (arr[uint(i)] < pivot) i++;
+        while (pivot < arr[uint(j)]) j--;
+        if (i <= j) {
+            // (pos[uint(i)], pos[uint(j)]) = (pos[uint(j)], pos[uint(i)]);
+            (arr[uint(i)], arr[uint(j)]) = (arr[uint(j)], arr[uint(i)]);
+            (pos[uint(i)], pos[uint(j)]) = (pos[uint(j)], pos[uint(i)]);
+            i++;
+            j--;
+        }
+    }
+    if (left < j)
+        quickSort(arr, pos, left, j);
+    if (i < right)
+        quickSort(arr, pos, i, right);
+    }
+    // this function does the sorting of distances
+    function sort_dist(uint[] memory data,uint[] memory pos) public returns (uint[] memory,uint[] memory) {
+        quickSort(data,pos, int(0), int(data.length - 1));
+        sorted = data;
+        post = pos;
+        return (data,pos);
+    }
+    function set_sort_dist() public view returns (uint[] memory){
+        return sorted;
+    }
+    //this function performs argsort 
+    // function sort_pos(int[] memory a, int[] memory b) public {
+    // // a is the sorted array positions and b is unsroted array positions
+    //     for(uint i =0; i <a.length; i++){
+    //         for(uint j =0; j<b.length;j++){
+    //             if (a[i]==b[j]){
+    //                 pos.push(int(j));
+    //                 // i=j;
+
+    //             }
+    //         }
+    //     }
+    // }
+    function set_pos() public view returns(uint[] memory){
+        return post;
+    }
+    // function reset_pos() public{
+    //     delete pos;
+    // }
+    
+    
+}
