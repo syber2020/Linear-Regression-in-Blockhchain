@@ -1,0 +1,32 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.7.0;
+
+
+
+//sort reference code : https://ethereum.stackexchange.com/questions/1517/sorting-an-array-of-integer-with-ethereum/89541
+
+contract QuickSort {
+    uint[] sel_sort;
+    function minIndex( uint[] memory a , uint i , uint j )internal returns(uint){
+    uint k;
+    if (i == j)return i;
+    k = minIndex(a, i + 1, j);
+    if(a[i]<a[k]){ return i;} else {return k;}
+    }
+     
+    function recurSelectionSort(uint[] memory a, uint n, uint index)public {
+    uint k;
+    if (index == n){return;}
+    k = minIndex(a, index, n-1);
+    if (k != index){
+        (a[k], a[index]) = (a[index], a[k]);
+    }
+    recurSelectionSort(a, n, index + 1);
+    }
+    
+    function get_sel_sort(uint[] memory data, uint n, uint index) public{
+    recurSelectionSort( data,  n, index);
+    sel_sort =data;
+    }
+    function set_sel_sort() public view returns (uint[] memory){ return sel_sort;}
+}
