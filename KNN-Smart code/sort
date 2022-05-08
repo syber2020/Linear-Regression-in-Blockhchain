@@ -1,0 +1,53 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.7.0;
+
+
+
+//sort reference code : https://ethereum.stackexchange.com/questions/1517/sorting-an-array-of-integer-with-ethereum/89541
+
+contract QuickSort {
+    uint[] sorted; int[]  c; int[] pos;
+    function quickSort(uint[] memory arr, int left, int right) public  {
+    int i = left;
+    int j = right;
+    if (i == j) return;
+    uint pivot = arr[uint(left + (right - left) / 2)];
+    while (i <= j) {
+        while (arr[uint(i)] < pivot) i++;
+        while (pivot < arr[uint(j)]) j--;
+        if (i <= j) {
+            (arr[uint(i)], arr[uint(j)]) = (arr[uint(j)], arr[uint(i)]);
+            i++;
+            j--;
+        }
+    }
+    if (left < j)
+        quickSort(arr, left, j);
+    if (i < right)
+        quickSort(arr, i, right);
+    }
+
+    function sort(uint[] memory data, uint ) public returns (uint[] memory) {
+        quickSort(data, int(0), int(data.length - 1));
+        sorted = data;
+        return data;
+    }
+    function set_sort() public view returns (uint[] memory){
+        return sorted;
+    }
+
+    function sort_pos(int[] memory a, int[] memory b) public {
+
+        for(uint i =0; i <a.length; i++){
+            for(uint j =0; j<b.length;j++){
+                if (a[i]==b[j]){
+                    pos.push(int(j));
+
+                }
+            }
+        }
+    }
+    function set_pos() public view returns(int[] memory){
+        return pos;
+    }
+}
