@@ -1,0 +1,196 @@
+pragma solidity 0.7.0;
+
+contract find{
+    int x;int[]  z_num; int[]  z_den; int anum; int aden;
+    int yhnum; int yhden; int[] y_diff_num; int[] y_diff_den;
+    
+    int[] delta_w_num; int[] delta_w_den; int del_bnum; int del_bden;
+    int lr_num; int lr_den;
+    
+    int[] _wnum; int[] _wden; int _bnum; int _bden;
+    
+    int[] y_hat_num; int[] y_hat_den;
+    int[] mulnum; int[] mulden;
+    
+    constructor(int[] memory wnum, int[] memory wden, int bnum, int bden, int lrn, int lrd){
+       _wnum = wnum;
+       _wden = wden;
+       _bnum = bnum;
+       _bden = bden;
+       lr_num = lrn;
+       lr_den = lrd;
+   }  
+    
+    function get_lcm(int x, int y) public returns(int){
+        int greater;  int lcm;
+        if(x>y){ greater =x;}
+        else{ greater =y;}
+        while(true){
+            if(x==0){ lcm = y; break;}
+            else if (y==0){lcm =x; break;}
+            else if(greater%x==0 && greater%y==0) { lcm = greater; break;}
+            greater +=1;
+        }
+        return greater;
+    }
+    function get_larger(int[] memory a) public returns (int){
+        int big =0;
+        for( uint i =0; i<a.length; i++){
+            if(a[i]>big){ big = a[i];}
+        }
+     x = big;   
+     return big;        
+    } 
+   
+    function get_add_array(int[] memory num, int[] memory den) public returns(int,int){
+        int lcm; int res_num=0; int res_den=0;
+        lcm = get_larger(den);
+        res_den = lcm;
+        for(uint i =0;i< num.length;i++){
+            res_num = res_num + (lcm/den[i])*num[i];
+        }
+        anum = res_num; 
+        aden = res_den;
+    }
+
+    function get_multiply(int[] memory a_num, int[] memory a_den,int[] memory b_num,
+    int[] memory b_den) public returns(int[] memory,int[] memory) {
+         int num; int den;
+        for( uint i=0; i<a_num.length; i++){
+            int x = a_num[i]*b_num[i];
+            int y = a_den[i]*b_den[i];
+            z_num.push(x); z_den.push(y);   
+        }
+        return (z_num,z_den);
+    }
+    
+    function get_addition(int a, int b, int c, int d) public returns(int,int){
+        int num; int den; 
+        den = get_lcm(b,d);
+        if (b==0){num = c ; den = d;}
+        else if (d==0){num= a ; den = b;}
+        else    { num = ((den/b)*a) + ((den/d)*c);}
+        return (num,den);
+    }
+    
+    
+    function get_subtraction(int a, int b, int c, int d) public returns(int,int){
+        int sub_num; int sub_den;
+        sub_den = get_lcm(b,d);
+        if(b==0){sub_num = c ; sub_den = d;}
+        else if (d==0){sub_num= a ; sub_den = b;}
+        else {sub_num = ((sub_den/b)*a) - ((sub_den/d)*c); }
+        return (sub_num,sub_den);
+    }
+    
+    function get_y_hat(int[] memory xnum, int[] memory xden,int[] memory wn, int[] memory wd) public {
+        get_multiply(xnum,xden,wn,wd);
+        get_add_array(z_num,z_den);
+        (yhnum,yhden)=get_addition(anum,aden,_bnum,_bden);
+        y_hat_num.push(yhnum); 
+        y_hat_den.push(yhden);
+        reset_z_arrays();   
+    }
+
+    function get_mse_diff(int[] memory yhn, int[] memory yhd,int[] memory ynum, int[] memory yden) public {
+        int num1; int den1; int num; int den;
+        for(uint i=0;i<yhn.length;i++){
+            (num1,den1) = get_subtraction(yhn[i],yhd[i],ynum[i],yden[i]);
+            y_diff_num.push(num1); 
+            y_diff_den.push(den1);
+            num = num1*num1;
+            den = den1*den1;
+            mulnum.push(num);
+            mulden.push(den);
+        }   
+        // get_add_array(mulnum,mulden);
+        // int n = int(yhn.length);
+        // aden = aden * n;
+        
+    }
+    function get_mse_sum()public {
+        int n;
+        get_add_array(mulnum,mulden);
+        n = int(y_hat_num.length);
+        aden = aden*n;
+        delete mulnum;
+        delete mulden;
+    }
+    
+    
+    //get each of the delta separately
+    // reset znum and zden before thiss step
+    function get_delta_w(int[] memory xnum, int[] memory xden, int[] memory ydifn, int[] memory ydifd) public { 
+        //for each rows of inputs
+        //xnum and xden input is transposed
+        //later on change the function input to only xnum and xden
+        
+        get_multiply (xnum,xden,ydifn, ydifd); //this saves your results to znum and zden
+        get_add_array(z_num,z_den);
+        anum = anum *2;
+        int n = int(xnum.length);
+        aden = aden *n;
+        reset_z_arrays();  
+        // anum = anum*lr_num;
+        // aden = aden*lr_den;
+        delta_w_num.push(anum);
+        delta_w_den.push(aden);
+        
+    }
+
+    function set_delta_w() public view returns(int[] memory, int[] memory){
+        return (delta_w_num, delta_w_den);
+    }
+    
+    function get_delta_b(int[] memory ydifn, int[] memory ydifd) public {
+        get_add_array(ydifn,ydifd);
+        anum = anum *2;
+        int n = int(ydifd.length);
+        aden = aden *n;
+        del_bnum = anum; 
+        del_bden = aden;
+    }
+    
+    function set_delta_b() public view returns(int,int){ return (del_bnum,del_bden);}
+    
+   //delta w already defined earlier, following function is a test function
+    function get_new_weights() public  {
+        for (uint i=0;i<delta_w_num.length; i++){
+            int x; int y;
+            delta_w_num[i] = delta_w_num[i]* lr_num;
+            delta_w_den[i] = delta_w_den[i]* lr_den;
+            (_wnum[i], _wden[i]) = get_subtraction(_wnum[i],_wden[i],delta_w_num[i],delta_w_den[i]);
+            
+        }
+        delete delta_w_num; delete delta_w_den;
+    }
+    function get_new_bias() public {
+        int btemp_num; int btemp_den;
+        btemp_num = lr_num * del_bnum;
+        btemp_den = lr_den * del_bden;
+        (_bnum,_bden) = get_subtraction(_bnum,_bden,btemp_num,btemp_den);
+        // reset_delta_w();
+        // reset_y_diff();
+        // reset_y_hat();
+    }
+    
+    function set_y_diff() public view returns(int[] memory, int[] memory){ return(y_diff_num, y_diff_den);}
+    function set_mse() public view returns(int,int){ return (anum,aden);}
+    function reset_z_arrays() public{ delete z_num; delete z_den;}
+    function reset_delta_w() public { delete delta_w_num; delete delta_w_den;}
+    function reset_y_diff() public { delete y_diff_num; delete y_diff_den;}
+    function reset_y_hat() public { delete y_hat_num; delete y_hat_den;}
+    function set_multiplier() public view returns (int[] memory, int[] memory){ return (z_num,z_den);}
+    function print_larger() public view returns(int){return x;}
+     function set_add_array() public view returns(int,int){
+        return (anum,aden);
+    } 
+    
+    function set_y_hat() public view returns(int[] memory,int[] memory){
+        return(y_hat_num,y_hat_den);
+    }
+    
+    function set_new_parameters() public view returns(int[] memory, int[] memory, int,int ){
+        return(_wnum, _wden, _bnum, _bden);
+    }
+}
